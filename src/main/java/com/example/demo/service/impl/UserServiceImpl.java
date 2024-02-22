@@ -30,10 +30,14 @@ public class UserServiceImpl implements UserService {
 			log.info("此email: {}已被註冊", userRegisterRequest.getEmail());
 			throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
 		}
-		//使用MD5生成密碼的雜湊值
-		String hashedPassword=DigestUtils.md5DigestAsHex(userRegisterRequest.getPassword().getBytes());
-		//字串轉成byte類型
-		userRegisterRequest.setPassword(hashedPassword);
+		else {
+			//使用MD5生成密碼的雜湊值
+			String hashedPassword=DigestUtils.md5DigestAsHex(userRegisterRequest.getPassword().getBytes());
+			//字串轉成byte類型
+			userRegisterRequest.setPassword(hashedPassword);
+			log.info("註冊成功", userRegisterRequest.getEmail());
+		}
+		
 		return userDao.createUser(userRegisterRequest);
 	}
 
