@@ -26,9 +26,9 @@ public class PostServiceImpl implements  PostService{
 		return postDao.getPostByArticleId(articleId);
 	}
 	
-	@Override
-	public Post getBoardIdByBoard(PostRequest postRequest) {
-		return postDao.getBoardIdByBoard(postRequest);
-	}
+//	@Override
+//	public Post getBoardIdByBoard(PostRequest postRequest) {
+//		return postDao.getBoardIdByBoard(postRequest);
+//	}
 
 }

@@ -14,8 +14,9 @@ import org.springframework.stereotype.Component;
 
 import com.example.demo.dao.PostDao;
 import com.example.demo.dto.PostRequest;
+import com.example.demo.model.Article;
 import com.example.demo.model.Post;
-import com.example.demo.model.User;
+import com.example.demo.rowMapper.ArticleRowMapper;
 import com.example.demo.rowMapper.PostRowMapper;
 @Component
 public class PostDaoImpl implements PostDao{
@@ -24,7 +25,7 @@ public class PostDaoImpl implements PostDao{
 	@Override
 	public Integer addPost(PostRequest postRequest) {
 
-		String sql="insert into article(article_id,email,title,context,board_id,created_date,shield,img) values(:articleId,:email,:title,:context,:boardId,:createdDate,:shield,:img)";
+		String sql="insert into article(email,title,context,board_id,created_date,shield,img) values(:email,:title,:context,:boardId,:createdDate,:shield,:img)";
 		Map<String,Object> map=new HashMap<>();
 		map.put("email", postRequest.getEmail() );
 		map.put("title", postRequest.getTitle());
@@ -32,8 +33,8 @@ public class PostDaoImpl implements PostDao{
 		map.put("img", postRequest.getImg() );
 		Date date=new Date();
 		map.put("createdDate", date );
-		map.put("boardId",getBoardIdByBoard(postRequest).getBoardId() );
-		map.put("shield", "0" );
+		map.put("boardId",getBoardIdByBoard(postRequest).getBoardId());
+		map.put("shield",false  );
 		KeyHolder keyHolder=new GeneratedKeyHolder();
 		namedParameterJdbcTemplate.update(sql, new MapSqlParameterSource(map), keyHolder);
 		int articleId=keyHolder.getKey().intValue();
@@ -41,11 +42,11 @@ public class PostDaoImpl implements PostDao{
 	}
 
 	@Override
-	public Post getBoardIdByBoard(PostRequest postRequest) {
+	public Article getBoardIdByBoard(PostRequest postRequest) {
 		String sql="select board_id from article_board where board=:board";
 		Map<String,Object> map=new HashMap<>();
 		map.put("board", postRequest.getBoard() );
-		List <Post> list=namedParameterJdbcTemplate.query(sql, map, new PostRowMapper());
+		List <Article> list=namedParameterJdbcTemplate.query(sql, map, new ArticleRowMapper());
 		if(list.isEmpty()) {
 			return null;
 		}

@@ -6,6 +6,6 @@ import com.example.demo.model.Post;
 public interface PostService {
 
 	 Integer addPost(PostRequest postRequest);
-	 Post getBoardIdByBoard(PostRequest postRequest);
+//	 Post getBoardIdByBoard(PostRequest postRequest);
 	Post getPostByArticleId(Integer articleId);
 }
