@@ -1,5 +1,7 @@
 package com.example.demo.service.impl;
 
+import java.util.List;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,6 +26,16 @@ public class PostServiceImpl implements  PostService{
 	@Override
 	public Post getPostByArticleId(Integer articleId) {
 		return postDao.getPostByArticleId(articleId);
+	}
+
+	@Override
+	public List<PostRequest> getProducts() {
+		return postDao.getProducts();
+	}
+
+	@Override
+	public List<PostRequest> getPostByBoard(String board, String search) {
+		return postDao.getPostByBoard(board,search);
 	}
 	
 //	@Override

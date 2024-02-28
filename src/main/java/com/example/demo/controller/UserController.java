@@ -21,8 +21,7 @@ import com.example.demo.service.PostService;
 public class UserController {
 	@Autowired 
 	private UserService userService;
-	@Autowired 
-	private  PostService postService;
+	
 	@PostMapping("/user/register")
 	public ResponseEntity<User> register(@RequestBody @Valid UserRegisterRequest userRegisterRequest){
 		//去判斷是否有註冊過，沒有就去創建一個帳號並回傳userId，有就去跳錯並在前端顯式此帳號已註冊過
@@ -36,13 +35,6 @@ public class UserController {
 	public ResponseEntity<User> login(@RequestBody @Valid UserLoginRequest userLoginRequest){
 		User user=userService.login(userLoginRequest);
 		return ResponseEntity.status(HttpStatus.OK).body(user);
-	}
-	
-	@PostMapping("/addpost")
-	public ResponseEntity<Post> addpost(@RequestBody PostRequest postRequest){
-		Integer articleId=postService.addPost(postRequest);
-		Post post=postService.getPostByArticleId(articleId);
-		return ResponseEntity.status(HttpStatus.OK).body(post);
 	}
 	
 }

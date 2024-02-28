@@ -17,6 +17,7 @@ import com.example.demo.dto.PostRequest;
 import com.example.demo.model.Article;
 import com.example.demo.model.Post;
 import com.example.demo.rowMapper.ArticleRowMapper;
+import com.example.demo.rowMapper.PostRequestRowMapper;
 import com.example.demo.rowMapper.PostRowMapper;
 @Component
 public class PostDaoImpl implements PostDao{
@@ -69,4 +70,40 @@ public class PostDaoImpl implements PostDao{
 		}
 	}
 
-}
+	@Override
+	public List<PostRequest> getProducts() {
+//		String sql="select email,title,context,board_id,img from article";
+		String sql = "SELECT a.email, a.title, a.context, a.board_id, a.img, b.board " +
+                "FROM article a " +
+                "JOIN article_board b ON a.board_id = b.board_id";
+		Map<String,Object> map=new HashMap<>();
+		List <PostRequest> list=namedParameterJdbcTemplate.query(sql, map, new PostRequestRowMapper());
+		if(list.isEmpty()) {
+			return null;
+		}
+		else {
+			return list;
+		}
+	}
+
+
+	@Override
+	public List<PostRequest> getPostByBoard(String board, String search) {
+		String sql = "SELECT a.email, a.title, a.context, a.board_id, a.img, b.board " +
+                "FROM article a " +
+                "JOIN article_board b ON a.board_id = b.board_id where 1=1";
+		//1=1不會影響查詢結果 是為了讓查詢條件可以自由的拼接在sql後面
+		//是spring jdbctemplate中好用的解法 使用jpa的話不會有這個問題 他會自己處理多個條件的組合問題		
+		Map<String,Object> map=new HashMap<>();
+		if(board!=null) {
+			sql=sql+" and board=:board";
+			map.put("board", board);
+		}
+		if(search!=null) {
+			sql=sql+" and (title LIKE :search OR context LIKE :search)"; //LIKE常和%一起用
+			map.put("search", "%"+search+"%");//表示只要有search字的都算
+		}
+		List<PostRequest> list=namedParameterJdbcTemplate.query(sql, map, new PostRequestRowMapper());
+		return list;
+	}
+	}
