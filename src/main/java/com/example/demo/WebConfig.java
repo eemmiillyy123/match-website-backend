@@ -10,7 +10,7 @@ public class WebConfig implements WebMvcConfigurer {
     @Override
     public void addCorsMappings(CorsRegistry registry) {
         registry.addMapping("/**") // 配置你的接口路径
-                .allowedOrigins("http://localhost:3001") // 允许的前端地址
+                .allowedOrigins("http://localhost:3000") // 允许的前端地址
                 .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS");
     }
 }

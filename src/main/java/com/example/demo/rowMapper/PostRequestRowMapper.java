@@ -17,6 +17,9 @@ public class PostRequestRowMapper implements RowMapper<PostRequest>{
 		postRequest.setEmail(rs.getString("email"));
 		postRequest.setImg(rs.getString("img"));
 		postRequest.setTitle(rs.getString("title"));
+		postRequest.setCreatedDate(rs.getDate("created_date"));
+		postRequest.setArticleId(rs.getInt("article_id"));
+		postRequest.setShield(rs.getBoolean("shield"));
 		return postRequest;
 	}
 	
