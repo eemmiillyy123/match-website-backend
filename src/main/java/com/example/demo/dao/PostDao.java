@@ -34,4 +34,6 @@ public interface PostDao {
 
 	Integer cancleLike(Integer articleId, Integer userId);
 
+	List <Post> getMyPostByEmail(String email);
+
 }

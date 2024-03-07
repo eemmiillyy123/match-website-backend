@@ -14,6 +14,7 @@ import org.springframework.web.server.ResponseStatusException;
 import com.example.demo.dao.UserDao;
 import com.example.demo.dto.UserLoginRequest;
 import com.example.demo.dto.UserRegisterRequest;
+import com.example.demo.dto.UsernameRevisionRequest;
 import com.example.demo.model.User;
 import com.example.demo.service.UserService;
 
@@ -67,5 +68,34 @@ public class UserServiceImpl implements UserService {
 			throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
 		}
 		
+	}
+
+	@Override
+	public User reviseEmail(String oldEmail, String newEmail) {
+		return userDao.reviseEmail(oldEmail,newEmail);
+	}
+
+	@Override
+	public User reviseUsername(UsernameRevisionRequest request) {
+		return userDao.reviseUsername(request);
+	}
+
+	@Override
+	public User getUserByEmail(String email) {
+		return userDao.getUserByEmail(email);
+	}
+
+	@Override
+	public Boolean verifyPassword(String oldPassword, String email) {
+		//使用MD5生成密碼的雜湊值
+		String hashedPassword=DigestUtils.md5DigestAsHex(oldPassword.getBytes());
+		return userDao.verifyPassword(hashedPassword,email);
+	}
+
+	@Override
+	public User revisePassword(String newPassword, String email) {
+		//使用MD5生成密碼的雜湊值
+		String hashedPassword=DigestUtils.md5DigestAsHex(newPassword.getBytes());
+		return userDao.revisePassword(hashedPassword,email);
 	}
 }

@@ -6,7 +6,6 @@ import java.sql.SQLException;
 import org.springframework.jdbc.core.RowMapper;
 
 import com.example.demo.model.Post;
-import com.example.demo.model.User;
 
 public class PostRowMapper implements RowMapper<Post>{
 	@Override

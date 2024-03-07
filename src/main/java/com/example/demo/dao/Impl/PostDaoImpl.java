@@ -62,7 +62,6 @@ public class PostDaoImpl implements PostDao{
 		} catch (EmptyResultDataAccessException e) {
 			return null;
 		}
-		
 	}
 
 	@Override
@@ -171,7 +170,7 @@ public class PostDaoImpl implements PostDao{
 			return namedParameterJdbcTemplate.queryForObject(sql, map, new UserRowMapper());
 		} catch (EmptyResultDataAccessException e) {
 			return null;
-		}
+		}	
 	}
 	
 	//按讚
@@ -214,6 +213,20 @@ public class PostDaoImpl implements PostDao{
 	        namedParameterJdbcTemplate.update(sql, map);
 	    }
 	    return likeQuantity(articleId);
+	}
+
+	@Override
+	public List <Post> getMyPostByEmail(String email) {
+		String sql="select article_id,email,title,context,board_id,created_date,shield,img from article where email=:email";
+		Map<String,Object> map=new HashMap<>();
+		map.put("email", email );
+		List <Post> list=namedParameterJdbcTemplate.query(sql, map, new PostRowMapper());
+		if(list.isEmpty()) {
+			return null;
+		}
+		else {
+			return list;
+		}
 	}
 
 	

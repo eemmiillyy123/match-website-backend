@@ -16,8 +16,11 @@ import com.example.demo.dao.MatchDao;
 import com.example.demo.dao.PostDao;
 import com.example.demo.dto.MatchIntroduceRequest;
 import com.example.demo.model.MatchIntroduce;
+import com.example.demo.model.MatchResult;
 import com.example.demo.model.User;
 import com.example.demo.rowMapper.MatchIntroduceRowMapper;
+import com.example.demo.rowMapper.MatchResultRowMapper;
+import com.example.demo.rowMapper.UserRowMapper;
 @Component
 public class MatchDaoImpl implements MatchDao{
 	@Autowired
@@ -56,7 +59,7 @@ public class MatchDaoImpl implements MatchDao{
 
 	@Override
 	public MatchIntroduce getMatchIntroduce(Integer userId) {
-		String sql="select name,img,company_name,department,habit,tall,match_state from match_introduce where user_id=:userId";
+		String sql="select name,img,company_name,department,habit,tall,user_id,match_state from match_introduce where user_id=:userId";
 		Map<String,Object> map=new HashMap<>();
 		map.put("userId", userId );
 		try {
@@ -65,6 +68,106 @@ public class MatchDaoImpl implements MatchDao{
 			return null;
 		}
 	}
+
+	@Override
+	public Integer updataMatchIntroduce(String img, Integer id, String name, String companyName, String department,
+			String tall, String habit, boolean matchState) {
+		String sql = "UPDATE match_introduce SET user_id = :id,name=:name, company_name = :companyName, department = :department, tall = :tall, habit = :habit, match_State = :matchState ";
+
+	    Map<String,Object> map = new HashMap<>();
+	    map.put("id", id);
+	    map.put("companyName", companyName);
+	    map.put("department", department);
+	    map.put("tall", tall);
+	    map.put("habit", habit);
+	    map.put("matchState", matchState);
+	    map.put("name", name); 
+	    
+	    if (!img.isEmpty()) {
+	        map.put("img", img);
+	        sql += ", img = :img "; 
+	    }
+	    
+	    sql += "WHERE user_id = :id ";
+		Integer n= namedParameterJdbcTemplate.update(sql, map);
+		return n;
+
+	}
+
+	
+	@Override
+	@Transactional
+	public Integer saveMatch(Integer userAId, MatchIntroduce userB) {
+		Integer userBId=userB.getUserId();
+		String sql="insert into match_result (user_id_of_a,user_id_of_b) values(:userAId,:userBId)";
+		Map<String,Object> map=new HashMap<>();
+		map.put("userAId", userAId);
+		map.put("userBId", userBId);
+		Integer count=namedParameterJdbcTemplate.update(sql, new MapSqlParameterSource(map));
+		return count;
+	}
+	
+	@Override
+	public MatchResult getMatchByUser(Integer userAId,Integer userBId) {
+		String sql="select choose,result,user_id_of_a,user_id_of_b from match_result where user_id_of_a=:userAId && user_id_of_b=:userBId";
+		Map<String,Object> map=new HashMap<>();
+		map.put("userAId", userAId );
+		map.put("userBId", userBId );
+		try {
+			MatchResult re= namedParameterJdbcTemplate.queryForObject(sql, map, new MatchResultRowMapper());
+			return re;
+		} catch (EmptyResultDataAccessException e) {
+			return null;
+		}
+	}
+
+	@Override
+	public MatchResult confirmUserIsMating(Integer userBId) {
+		String sql="select choose,result,user_id_of_a,user_id_of_b from match_result where user_id_of_b=:userBId";
+		Map<String,Object> map=new HashMap<>();
+		map.put("userBId", userBId );
+		try {
+			MatchResult re= namedParameterJdbcTemplate.queryForObject(sql, map, new MatchResultRowMapper());
+			return re;
+		} catch (EmptyResultDataAccessException e) {
+			return null;
+		}
+	}
+
+	
+
+	@Override
+	public MatchResult willingToMatch(MatchResult result) {
+		Integer userAId=result.getUserAId();
+		Integer userBId=result.getUserBId();
+		String sql="update match_result set choose=:choose where user_id_of_a=:userAId and user_id_of_b=:userBId";
+		Map<String,Object> map=new HashMap<>();
+		map.put("userAId", userAId);
+		map.put("userBId", userBId);
+		map.put("choose", true);
+		map.put("result", false);
+		namedParameterJdbcTemplate.update(sql, map);
+		return null;
+	}
+
+	@Override
+	public List <Integer> getAllUserId(Integer id) {
+		String sql="select user_id from match_introduce where user_id!=:userId";
+		Map<String,Object> map=new HashMap<>();
+		map.put("userId", id );
+		List <Integer> list=namedParameterJdbcTemplate.queryForList(sql, map, Integer.class);
+		if(list.isEmpty()) {
+			return null;
+		}
+		else {
+			return list;
+		}
+	}
+
+
+
+
+
 
 //	@Override
 //	public List<Map<String, Object>> getAllIntroduce(Integer userId) {

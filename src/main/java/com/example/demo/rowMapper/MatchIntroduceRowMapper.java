@@ -19,6 +19,7 @@ public class MatchIntroduceRowMapper  implements RowMapper<MatchIntroduce>{
 		matchIntroduce.setImg(rs.getString("img"));
 		matchIntroduce.setMatchState(rs.getBoolean("match_state"));
 		matchIntroduce.setTall(rs.getString("tall"));
+		matchIntroduce.setUserId(rs.getInt("user_id"));
 		return matchIntroduce;
 	}
 	
