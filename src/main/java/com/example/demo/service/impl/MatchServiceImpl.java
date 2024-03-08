@@ -91,31 +91,54 @@ public class MatchServiceImpl implements MatchService{
 		double score;
 		double getMaxScore=0;
 		Integer matchUserId=0;
-		for (Integer userId : list) {
-			anotherPeople=matchDao.getMatchIntroduce(userId);
-			// 計算匹配度
-			score = calculateInterestScore(matchIntroduce.getHabit(), anotherPeople.getHabit());	
-			if(score>getMaxScore){
-				getMaxScore=score;
-				matchUserId=userId;
-			}
 		
-        System.out.println("userId:"+userId+" interest matching score: " + score);
-		}
-		System.out.println("matchUserId:"+matchUserId);
+		MatchIntroduce matchPeople=getMatchIntroduce(matchUserId);
 		MatchResult a=matchDao.confirmUserIsMating(matchIntroduce.getUserId());
-		if(a!=null&&a.isResult()) {
+		if(a!=null&&!a.isResult()) {
+//			MatchResult re=matchDao.getMatchByUser(a.getUserBId());
+//			matchDao.saveMatch(matchIntroduce.getUserId(),getMatchIntroduce(a.getUserAId()));	
+			return getMatchIntroduce(a.getUserBId());
+			 
+		}
+		MatchResult b=matchDao.isMating(matchIntroduce.getUserId());
+		if(b!=null&&!b.isResult()) {
+			matchDao.saveMatch(matchIntroduce.getUserId(),getMatchIntroduce(b.getUserAId()));
+			return getMatchIntroduce(b.getUserBId());
+			 
+		}
+		//查詢是否已經有人和他配對
+//		MatchResult result=matchDao.getMatchByTwo(matchIntroduce.getUserId(),matchPeople.getUserId());
+//		if(result==null) {//沒有的話就去找一個人配對
+			for (Integer userId : list) {
+				
+				if(matchDao.confirmUserIsMating(userId)!=null || matchDao.isMating(userId)!=null) {
+					continue;
+//					list.remove(userId);
+//					list.remove(matchDao.confirmUserIsMating(userId).getUserBId());
+//					list.remove(matchDao.isMating(userId).getUserAId());
+				}
+				else {
+					// 計算匹配度
+					anotherPeople=matchDao.getMatchIntroduce(userId);
+					score = calculateInterestScore(matchIntroduce.getHabit(), anotherPeople.getHabit());	
+					if(score>getMaxScore){
+						getMaxScore=score;
+						matchUserId=userId;
+					}
+					System.out.println("userId:"+userId+" interest matching score: " + score);
+				}
+				
+			}
+			System.out.println("matchUserId:"+matchUserId);
+			System.out.println("matchIntroduceId:"+matchIntroduce.getUserId());
+			if(matchUserId==0) {
+				return null;
+			}
+			Integer count= matchDao.saveMatch(matchIntroduce.getUserId(),getMatchIntroduce(matchUserId));	
+			return matchPeople;
 			
-		}
-		MatchIntroduce matchPeople=matchDao.getMatchIntroduce(matchUserId);
-		if(matchDao.getMatchByUser(matchIntroduce.getUserId(),matchPeople.getUserId())==null) {
-			Integer count= matchDao.saveMatch(matchIntroduce.getUserId(),matchPeople);	
-		}
-		else {
-			
-		}
-		
-		return matchPeople;
+//		}
+//		return matchPeople;
 		
 	}
 
@@ -198,6 +221,15 @@ public class MatchServiceImpl implements MatchService{
 		} catch (EmptyResultDataAccessException e) {
 			return null;
 		}
+	}
+
+	@Override
+	public MatchIntroduce hasNewMatches(MatchIntroduce matchIntroduce) {
+		if(matchDao.hasNewMatches()) {
+			return match(matchIntroduce);
+//			return true;
+		}
+		return null;
 	}
 
 }

@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.ResourceUtils;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -131,5 +132,16 @@ public class MatchController {
 	public ResponseEntity<MatchResult> willingToMatch(@RequestBody MatchResult result){
 		MatchResult match=matchService.willingToMatch(result);
 		return ResponseEntity.status(HttpStatus.OK).body(match);
+	}
+	
+//	@PostMapping("/checkForNewMatches")
+	@PostMapping(value = { "/checkForNewMatches" }, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE )
+	public ResponseEntity<MatchIntroduce> checkForNewMatches(@RequestParam  MatchIntroduce matchIntroduce) {
+	    try {
+	    	MatchIntroduce match = matchService.hasNewMatches(matchIntroduce);
+	        return ResponseEntity.status(HttpStatus.OK).body(match);
+	    } catch (Exception e) {
+	    	return ResponseEntity.status(HttpStatus.OK).body(null);
+	    }
 	}
 }

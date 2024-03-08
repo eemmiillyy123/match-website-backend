@@ -26,9 +26,15 @@ public interface MatchDao {
 
 	List <Integer> getAllUserId(Integer id);
 
-	MatchResult getMatchByUser(Integer userAId, Integer userBId);
+	MatchResult getMatchByUser(Integer userBId);
 
 	MatchResult confirmUserIsMating(Integer userAId);
+
+	MatchResult isMating(Integer userAId);
+
+	MatchResult getMatchByTwo(Integer userAId, Integer userBId);
+
+	boolean hasNewMatches();
 
 //	List<Map<String, Object>> getAllIntroduce(Integer userId);
 }

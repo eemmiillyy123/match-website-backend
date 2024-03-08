@@ -108,7 +108,21 @@ public class MatchDaoImpl implements MatchDao{
 	}
 	
 	@Override
-	public MatchResult getMatchByUser(Integer userAId,Integer userBId) {
+	public MatchResult getMatchByUser(Integer userBId) {
+		String sql="select choose,result,user_id_of_a,user_id_of_b from match_result where user_id_of_a=:userAId && user_id_of_b=:userBId";
+		Map<String,Object> map=new HashMap<>();
+//		map.put("userAId", userAId );
+		map.put("userBId", userBId );
+		try {
+			MatchResult re= namedParameterJdbcTemplate.queryForObject(sql, map, new MatchResultRowMapper());
+			return re;
+		} catch (EmptyResultDataAccessException e) {
+			return null;
+		}
+	}
+
+	@Override
+	public MatchResult getMatchByTwo(Integer userAId,Integer userBId) {
 		String sql="select choose,result,user_id_of_a,user_id_of_b from match_result where user_id_of_a=:userAId && user_id_of_b=:userBId";
 		Map<String,Object> map=new HashMap<>();
 		map.put("userAId", userAId );
@@ -123,7 +137,7 @@ public class MatchDaoImpl implements MatchDao{
 
 	@Override
 	public MatchResult confirmUserIsMating(Integer userBId) {
-		String sql="select choose,result,user_id_of_a,user_id_of_b from match_result where user_id_of_b=:userBId";
+		String sql="select choose,result,user_id_of_a,user_id_of_b from match_result where user_id_of_a=:userBId";
 		Map<String,Object> map=new HashMap<>();
 		map.put("userBId", userBId );
 		try {
@@ -134,7 +148,20 @@ public class MatchDaoImpl implements MatchDao{
 		}
 	}
 
-	
+	@Override
+	public MatchResult isMating(Integer userAId) {
+		String sql="select choose,result,user_id_of_a,user_id_of_b from match_result where user_id_of_b=:userAId";
+		Map<String,Object> map=new HashMap<>();
+		map.put("userAId", userAId );
+//		map.put("userAId", userAId );
+		try {
+			MatchResult re= namedParameterJdbcTemplate.queryForObject(sql, map, new MatchResultRowMapper());
+			return re;
+		} catch (EmptyResultDataAccessException e) {
+			return null;
+		}
+
+	}
 
 	@Override
 	public MatchResult willingToMatch(MatchResult result) {
@@ -162,6 +189,14 @@ public class MatchDaoImpl implements MatchDao{
 		else {
 			return list;
 		}
+	}
+
+	@Override
+	public boolean hasNewMatches() {
+		 // 编写查询逻辑以检查是否有新配对数据
+        String sql = "SELECT COUNT(*) FROM matches WHERE user_id = true";
+        int count = jdbcTemplate.queryForObject(sql, Integer.class);
+        return count > 0;
 	}
 
 

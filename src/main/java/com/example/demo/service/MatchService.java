@@ -20,5 +20,6 @@ public interface MatchService {
 	MatchResult willingToMatch(MatchResult result);
 	Integer updataMatchIntroduce(MultipartFile file, Integer id, String name, String companyName, String department,
 			String tall, String habit, boolean matchState) throws IOException;
+	MatchIntroduce hasNewMatches(MatchIntroduce matchIntroduce);
 
 }
