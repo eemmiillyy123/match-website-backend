@@ -216,11 +216,14 @@ public class PostDaoImpl implements PostDao{
 	}
 
 	@Override
-	public List <Post> getMyPostByEmail(String email) {
-		String sql="select article_id,email,title,context,board_id,created_date,shield,img from article where email=:email";
+	public List <PostRequest> getMyPostByEmail(String email) {
+//		String sql="select article_id,email,title,context,board_id,created_date,shield,img from article where email=:email";
+		String sql = "SELECT a.article_id, a.email, a.title, a.context, a.board_id, a.img,a.created_date, b.board ,a.shield " +
+                "FROM article a  " +
+                "JOIN article_board b ON a.board_id = b.board_id where email=:email ";
 		Map<String,Object> map=new HashMap<>();
 		map.put("email", email );
-		List <Post> list=namedParameterJdbcTemplate.query(sql, map, new PostRowMapper());
+		List <PostRequest> list=namedParameterJdbcTemplate.query(sql, map, new PostRequestRowMapper());
 		if(list.isEmpty()) {
 			return null;
 		}

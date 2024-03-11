@@ -29,5 +29,5 @@ public interface PostService {
 	Integer likeQuantity(Integer articleId);
 	Integer searchByUserIdArticleId(Integer articleId,String email);
 	Integer addPost(String email, String title, String context, String board, MultipartFile file) throws IOException;
-	List <Post> getMyPostByEmail(String email);
+	List<PostRequest> getMyPostByEmail(String email);
 }

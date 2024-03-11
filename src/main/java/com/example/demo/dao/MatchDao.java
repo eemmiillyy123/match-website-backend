@@ -36,5 +36,11 @@ public interface MatchDao {
 
 	boolean hasNewMatches();
 
+	boolean confirmMatchResult(Integer userAId, Integer userBId);
+
+	void hasResult(Integer userAId, Integer userBId);
+
+	MatchResult notwillingToMatch(MatchResult result);
+
 //	List<Map<String, Object>> getAllIntroduce(Integer userId);
 }

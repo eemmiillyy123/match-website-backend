@@ -134,14 +134,25 @@ public class MatchController {
 		return ResponseEntity.status(HttpStatus.OK).body(match);
 	}
 	
-//	@PostMapping("/checkForNewMatches")
-	@PostMapping(value = { "/checkForNewMatches" }, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE )
-	public ResponseEntity<MatchIntroduce> checkForNewMatches(@RequestParam  MatchIntroduce matchIntroduce) {
-	    try {
-	    	MatchIntroduce match = matchService.hasNewMatches(matchIntroduce);
-	        return ResponseEntity.status(HttpStatus.OK).body(match);
-	    } catch (Exception e) {
-	    	return ResponseEntity.status(HttpStatus.OK).body(null);
-	    }
+	@PostMapping("/notwillingToMatch")
+	public ResponseEntity<MatchResult> notwillingToMatch(@RequestBody MatchResult result){
+		MatchResult match=matchService.notwillingToMatch(result);
+		return ResponseEntity.status(HttpStatus.OK).body(match);
 	}
+	
+	@PostMapping("/confirmMatchResult")
+	public ResponseEntity<Boolean> confirmMatchResult(@RequestBody MatchResult result){
+		boolean res=matchService.confirmMatchResult(result.getUserAId(),result.getUserBId());
+		return ResponseEntity.status(HttpStatus.OK).body(res);
+	}
+//	@PostMapping("/checkForNewMatches")
+//	@PostMapping(value = { "/checkForNewMatches" }, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE )
+//	public ResponseEntity<MatchIntroduce> checkForNewMatches(@RequestParam  MatchIntroduce matchIntroduce) {
+//	    try {
+//	    	MatchIntroduce match = matchService.hasNewMatches(matchIntroduce);
+//	        return ResponseEntity.status(HttpStatus.OK).body(match);
+//	    } catch (Exception e) {
+//	    	return ResponseEntity.status(HttpStatus.OK).body(null);
+//	    }
+//	}
 }

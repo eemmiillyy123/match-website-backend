@@ -17,9 +17,11 @@ public interface MatchService {
 //	List<Map<String, Object>> getAllIntroduce();
 //	List<MatchIntroduceRequest> getAllIntroduce(Integer userId);
 	MatchIntroduce match(MatchIntroduce matchIntroduce);
-	MatchResult willingToMatch(MatchResult result);
+	MatchResult  willingToMatch(MatchResult result);
 	Integer updataMatchIntroduce(MultipartFile file, Integer id, String name, String companyName, String department,
 			String tall, String habit, boolean matchState) throws IOException;
 	MatchIntroduce hasNewMatches(MatchIntroduce matchIntroduce);
+	boolean confirmMatchResult(Integer userAId, Integer userBId);
+	MatchResult notwillingToMatch(MatchResult result);
 
 }

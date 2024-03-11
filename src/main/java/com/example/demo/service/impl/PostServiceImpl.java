@@ -1,9 +1,11 @@
 package com.example.demo.service.impl;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Base64;
 import java.util.List;
 
 import org.slf4j.Logger;
@@ -13,6 +15,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.stereotype.Component;
+import org.springframework.util.ResourceUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.example.demo.dao.PostDao;
@@ -35,11 +38,17 @@ public class PostServiceImpl implements  PostService{
 	@Autowired
 	private PostDao postDao;
 	
-	@Value("${upload.folder.path}")
-    private String uploadFolderPath;
+	@Value("${upload.postImg.path}")
+    private String uploadPostImgPath;
 
-    @Value("${upload.file.path}")
-    private String uploadFilePath;
+    @Value("${upload.postfile.path}")
+    private String uploadPostfilePath;
+    
+//	@Value("${upload.folder.path}")
+//    private String uploadFolderPath;
+//
+//    @Value("${upload.file.path}")
+//    private String uploadFilePath;
 
 	@Override
 	public Integer addPost(String email, String title, String context, String board, MultipartFile file) throws IOException {
@@ -52,21 +61,30 @@ public class PostServiceImpl implements  PostService{
 			if(file==null) {
 				postRequest.setImg("");	
 			}else {
-				// Save the file to the server
-				// String fileName = StringUtils.cleanPath(file.getOriginalFilename());
-				// String uploadFolderPath = "images";
-		   	    Integer  id=getUserIdByEmail(email).getUserId();
-		   	    String[] fileType = file.getOriginalFilename().split("\\.");
-				String path = uploadFolderPath  + "/userId"+id+"image." + fileType[1];
-				String frontPath = uploadFilePath +"/userId"+id+"image."+ fileType[1];
-				//String path = uploadFolderPath + "/" + fileName;
-		        Path folderPath = Paths.get(uploadFolderPath);
-		        Path filePath = Paths.get(path);
-		        Files.createDirectories(folderPath);
-		        file.transferTo(filePath);
-	            // Generate the image URL
-		        //String imageUrl = "/getImage/app/path/" + fileName; // Adjust as per your URL structure
-	            // Save the post with the image URL
+				Integer  id=postDao.getUserIdByEmail(email).getUserId();
+		    	String[] fileType = file.getOriginalFilename().split("\\.");
+		    	String fileName = "userId" + id + "PostImage." + fileType[1];
+		    	String path = uploadPostImgPath +"/"+ fileName;
+		    	String frontPath =  fileName;
+//				String path = uploadFolderPath  + "/userId"+id+"IntroduceImage." + fileType[1];
+//				String frontPath = uploadFilePath +"/userId"+id+"IntroduceImage."+ fileType[1];
+//		         String path = uploadFolderPath + "/" + fileName;
+		         Path folderPath = Paths.get(uploadPostImgPath);
+		         if (!Files.exists(folderPath)) {
+		             Files.createDirectories(folderPath); // 如果目錄不存在，則創建它
+		         }
+		         
+		         Path filePath = Paths.get(path);
+		         file.transferTo(filePath);
+//		   	    Integer  id=getUserIdByEmail(email).getUserId();
+//		   	    String[] fileType = file.getOriginalFilename().split("\\.");
+//				String path = uploadFolderPath  + "/userId"+id+"image." + fileType[1];
+//				String frontPath = uploadFilePath +"/userId"+id+"image."+ fileType[1];
+//		        Path folderPath = Paths.get(uploadFolderPath);
+//		        Path filePath = Paths.get(path);
+//		        Files.createDirectories(folderPath);
+//		        file.transferTo(filePath);
+	           
 				postRequest.setImg(frontPath);		
 			}
 			return postDao.addPost(postRequest);
@@ -77,17 +95,61 @@ public class PostServiceImpl implements  PostService{
 
 	@Override
 	public Post getPostByArticleId(Integer articleId) {
-		return postDao.getPostByArticleId(articleId);
+		Post post=postDao.getPostByArticleId(articleId);
+		String image=readFile(post.getImg());
+		post.setImg(image);
+		return post;
 	}
 
 	@Override
 	public List<PostRequest> getPosts() {
-		return postDao.getPosts();
+		List<PostRequest> list=postDao.getPosts();
+		for (PostRequest request : list) {
+			String image=readFile(request.getImg());
+			request.setImg(image);
+		}
+		
+		return list;
+	}
+
+	private String readFile(String img) {
+		try {
+			File imageFile = ResourceUtils.getFile(uploadPostImgPath + img);
+	        // 讀取檔案的 MIME 類型
+	        String mimeType = Files.probeContentType(imageFile.toPath());
+	        byte[] imageBytes = Files.readAllBytes(imageFile.toPath());
+	        String base64Image = Base64.getEncoder().encodeToString(imageBytes);
+	        // 根據 MIME 類型設定 base64 圖片資料的前綴
+	        String base64ImageWithPrefix = "data:" + mimeType + ";base64," + base64Image;
+			return base64ImageWithPrefix;
+		 } catch (IOException e) {
+	            // 處理檔案讀取或其他 IO 錯誤
+	            e.printStackTrace();
+	            return null; // 或者拋出自定義例外
+	        }
 	}
 
 	@Override
 	public List<PostRequest> getPostByBoard(String board, String search) {
-		return postDao.getPostByBoard(board,search);
+		List<PostRequest> list=postDao.getPostByBoard(board,search);
+		for (PostRequest request : list) {
+			String image=readFile(request.getImg());
+			request.setImg(image);
+		}
+		
+		return list;
+	}
+	
+	
+	@Override
+	public List <PostRequest> getMyPostByEmail(String email) {
+		List<PostRequest> list= postDao.getMyPostByEmail(email);
+		for (PostRequest request : list) {
+			String image=readFile(request.getImg());
+			request.setImg(image);
+		}
+		
+		return list;
 	}
 
 	@Override
@@ -102,6 +164,8 @@ public class PostServiceImpl implements  PostService{
 		}
 	}
 
+
+	
 	@Override
 	public User getUserIdByEmail(String email) {
 		return postDao.getUserIdByEmail(email);
@@ -117,10 +181,7 @@ public class PostServiceImpl implements  PostService{
 		return postDao.searchByUserIdArticleId(articleId, postDao.getUserIdByEmail(email).getUserId());
 	}
 
-	@Override
-	public List <Post> getMyPostByEmail(String email) {
-		return postDao.getMyPostByEmail(email);
-	}
+
 
 	
 

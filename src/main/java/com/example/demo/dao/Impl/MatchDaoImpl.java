@@ -96,7 +96,6 @@ public class MatchDaoImpl implements MatchDao{
 
 	
 	@Override
-	@Transactional
 	public Integer saveMatch(Integer userAId, MatchIntroduce userB) {
 		Integer userBId=userB.getUserId();
 		String sql="insert into match_result (user_id_of_a,user_id_of_b) values(:userAId,:userBId)";
@@ -199,8 +198,46 @@ public class MatchDaoImpl implements MatchDao{
         return count > 0;
 	}
 
+	@Override
+	public boolean confirmMatchResult(Integer userAId, Integer userBId) {
+		String sql="select choose from match_result where user_id_of_a=:userAId && user_id_of_b=:userBId";
+		Map<String,Object> map=new HashMap<>();
+		map.put("userAId", userAId );
+		map.put("userBId", userBId );
+		try {
+			Boolean  choose=namedParameterJdbcTemplate.queryForObject(sql, map, boolean.class);
+			return choose;
+		} catch (EmptyResultDataAccessException e) {
+			return false;
+		}
+		
+	}
 
+	@Override
+	@Transactional
+	public void hasResult(Integer userAId, Integer userBId) {
+	    MatchResult matchResult = getMatchByTwo(userAId, userBId);
+	    matchResult.setResult(true); // 假設此方法設置了屬性，但不返回任何值
+//	    String sql = "UPDATE match_result SET result = true WHERE user_id_of_a = :userAId AND user_id_of_b = :userBId";
+	    StringBuilder builder=new StringBuilder("UPDATE match_result SET result = true WHERE user_id_of_a = :userAId AND user_id_of_b = :userBId");
+	    MapSqlParameterSource parameters = new MapSqlParameterSource();
+	    parameters.addValue("userAId", userAId);
+	    parameters.addValue("userBId", userBId);
+//	    namedParameterJdbcTemplate.update(builder, parameters);
+	}
 
+	@Override
+	public MatchResult notwillingToMatch(MatchResult result) {
+//		result.setChoose(false);
+		Integer userAId=result.getUserAId();
+		Integer userBId=result.getUserBId();
+		String sql="update match_result set choose=false where user_id_of_a=:userAId and user_id_of_b=:userBId";
+		Map<String,Object> map=new HashMap<>();
+		map.put("userAId", userAId);
+		map.put("userBId", userBId);
+		namedParameterJdbcTemplate.update(sql, map);
+		return result;
+	}
 
 
 

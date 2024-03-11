@@ -18,6 +18,7 @@ import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.ResourceUtils;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -46,6 +47,7 @@ public class MatchServiceImpl implements MatchService{
     private String uploadFilePath;
 	
 	@Override
+	@Transactional
 	public Integer saveMatchIntroduce(MatchIntroduceRequest matchIntroduceRequest) {
 		return matchDao.saveMatchIntroduce(matchIntroduceRequest);
 	}
@@ -62,10 +64,6 @@ public class MatchServiceImpl implements MatchService{
 		             String base64Image = Base64.getEncoder().encodeToString(imageBytes);
 		             // 根據 MIME 類型設定 base64 圖片資料的前綴
 		             String base64ImageWithPrefix = "data:" + mimeType + ";base64," + base64Image;
-//		            File imageFile = ResourceUtils.getFile(uploadFolderPath+ matchIntroduce.getImg());
-//
-//		            byte[] imageBytes = Files.readAllBytes(imageFile.toPath());
-//		            String base64Image = Base64.getEncoder().encodeToString(imageBytes);
 		            matchIntroduce.setImg(base64ImageWithPrefix);
 		            return matchIntroduce;
 		        } catch (IOException e) {
@@ -77,15 +75,10 @@ public class MatchServiceImpl implements MatchService{
 		    }
 	}
 	
-//	@Override
-//	public List<MatchIntroduceRequest>  getAllIntroduce(Integer userId) {
-//		List<MatchIntroduceRequest> list= matchDao.getAllIntroduce(userId);
-//		return list;
-//	}
 	
 	@Override
+	@Transactional
 	public MatchIntroduce match(MatchIntroduce matchIntroduce) {
-//		matchDao.getAllIntroduce(30);
 		List <Integer> list=getAllUserId(matchIntroduce.getUserId());
 		MatchIntroduce anotherPeople = new MatchIntroduce();
 		double score;
@@ -94,9 +87,7 @@ public class MatchServiceImpl implements MatchService{
 		
 		MatchIntroduce matchPeople=getMatchIntroduce(matchUserId);
 		MatchResult a=matchDao.confirmUserIsMating(matchIntroduce.getUserId());
-		if(a!=null&&!a.isResult()) {
-//			MatchResult re=matchDao.getMatchByUser(a.getUserBId());
-//			matchDao.saveMatch(matchIntroduce.getUserId(),getMatchIntroduce(a.getUserAId()));	
+		if(a!=null&&!a.isResult()) {	
 			return getMatchIntroduce(a.getUserBId());
 			 
 		}
@@ -106,29 +97,22 @@ public class MatchServiceImpl implements MatchService{
 			return getMatchIntroduce(b.getUserBId());
 			 
 		}
-		//查詢是否已經有人和他配對
-//		MatchResult result=matchDao.getMatchByTwo(matchIntroduce.getUserId(),matchPeople.getUserId());
-//		if(result==null) {//沒有的話就去找一個人配對
-			for (Integer userId : list) {
-				
-				if(matchDao.confirmUserIsMating(userId)!=null || matchDao.isMating(userId)!=null) {
-					continue;
-//					list.remove(userId);
-//					list.remove(matchDao.confirmUserIsMating(userId).getUserBId());
-//					list.remove(matchDao.isMating(userId).getUserAId());
-				}
-				else {
-					// 計算匹配度
-					anotherPeople=matchDao.getMatchIntroduce(userId);
-					score = calculateInterestScore(matchIntroduce.getHabit(), anotherPeople.getHabit());	
-					if(score>getMaxScore){
-						getMaxScore=score;
-						matchUserId=userId;
-					}
-					System.out.println("userId:"+userId+" interest matching score: " + score);
-				}
-				
+		for (Integer userId : list) {
+			if(matchDao.confirmUserIsMating(userId)!=null || matchDao.isMating(userId)!=null) {
+				continue;
 			}
+			else {
+				// 計算匹配度
+				anotherPeople=matchDao.getMatchIntroduce(userId);
+				score = calculateInterestScore(matchIntroduce.getHabit(), anotherPeople.getHabit());	
+				if(score>getMaxScore){
+					getMaxScore=score;
+					matchUserId=userId;
+				}
+				System.out.println("userId:"+userId+" interest matching score: " + score);
+			}
+			
+		}
 			System.out.println("matchUserId:"+matchUserId);
 			System.out.println("matchIntroduceId:"+matchIntroduce.getUserId());
 			if(matchUserId==0) {
@@ -136,10 +120,6 @@ public class MatchServiceImpl implements MatchService{
 			}
 			Integer count= matchDao.saveMatch(matchIntroduce.getUserId(),getMatchIntroduce(matchUserId));	
 			return matchPeople;
-			
-//		}
-//		return matchPeople;
-		
 	}
 
 	private List <Integer> getAllUserId(Integer id) {
@@ -176,36 +156,25 @@ public class MatchServiceImpl implements MatchService{
     }
 
 	@Override
+	@Transactional
 	public MatchResult willingToMatch(MatchResult result) {
 		return matchDao.willingToMatch(result);
 	}
 
 	@Override
+	@Transactional
 	public Integer updataMatchIntroduce(MultipartFile file, Integer id, String name, String companyName,
 			String department, String tall, String habit, boolean matchState) throws IOException {
 		String img="";
-//		MatchIntroduceRequest introduce=new MatchIntroduceRequest();
-//		introduce.setCompanyName(companyName);
-//		introduce.setDepartment(department);
-//		introduce.setHabit(habit);
-//		introduce.setMatchState(matchState);
-//		introduce.setName(name);
-//		introduce.setTall(tall);
-//		introduce.setEmail(email);
 		try {
 			if(file==null) {
 				img="";
-//				introduce.setImg("");
 				
 			}else {
-//		   	   String[] fileType = file.getOriginalFilename().split("\\.");
 				String[] fileType = file.getOriginalFilename().split("\\.");
 		    	String fileName = "userId" + id + "IntroduceImage." + fileType[1];
 		    	String path = uploadFolderPath +"/"+ fileName;
 		    	String frontPath =  fileName;
-//				String path = uploadFolderPath  + "/userId"+id+"IntroduceImage." + fileType[1];
-//				String frontPath = uploadFilePath +"/userId"+id+"IntroduceImage."+ fileType[1];
-//		         String path = uploadFolderPath + "/" + fileName;
 		         Path folderPath = Paths.get(uploadFolderPath);
 		         if (!Files.exists(folderPath)) {
 		             Files.createDirectories(folderPath); // 如果目錄不存在，則創建它
@@ -214,8 +183,7 @@ public class MatchServiceImpl implements MatchService{
 		         Path filePath = Paths.get(path);
 		         file.transferTo(filePath);
 
-		        img=frontPath;
-//		        introduce.setImg(frontPath);		
+		        img=frontPath;	
 			}
 			return matchDao.updataMatchIntroduce(img,id, name,companyName,department,tall, habit, matchState);
 		} catch (EmptyResultDataAccessException e) {
@@ -227,9 +195,29 @@ public class MatchServiceImpl implements MatchService{
 	public MatchIntroduce hasNewMatches(MatchIntroduce matchIntroduce) {
 		if(matchDao.hasNewMatches()) {
 			return match(matchIntroduce);
-//			return true;
 		}
 		return null;
+	}
+
+	@Override
+	@Transactional
+	public boolean confirmMatchResult(Integer userAId, Integer userBId) {
+		if(matchDao.confirmMatchResult(userAId,userBId)) {
+			if(matchDao.confirmMatchResult(userBId,userAId)) {
+				matchDao.hasResult(userAId,userBId);
+				matchDao.hasResult(userBId,userAId);
+				return true;
+			}
+			else {
+				
+			}
+		}
+		return false;
+	}
+
+	@Override
+	public MatchResult notwillingToMatch(MatchResult result) {
+		return matchDao.notwillingToMatch(result);
 	}
 
 }

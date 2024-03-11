@@ -91,8 +91,8 @@ public class PostController {
 	}
 	
 	@GetMapping("/getMyPostByEmail")
-	public ResponseEntity<List <Post>> getMyPostByEmail(@RequestParam String email) {
-		List <Post> mypost= postService.getMyPostByEmail(email);
+	public ResponseEntity<List <PostRequest>> getMyPostByEmail(@RequestParam String email) {
+		List <PostRequest> mypost= postService.getMyPostByEmail(email);
 		return ResponseEntity.status(HttpStatus.OK).body(mypost);
 	}
 	
